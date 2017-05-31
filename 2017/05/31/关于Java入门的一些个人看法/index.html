@@ -1,0 +1,659 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="随笔," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="两周前终于答辩结束了，研究生顺利毕业。其实我很早就就迫不及待想毕业，早点工作，早点进入自己期待的行业奋好好奋斗一番。前几天有师弟师妹问我关于找工作的事情，还有如何学好Java找到理想的工作。因为我们的专业邻域属于仪器科学，很多都是做硬件，稍微沾点软件的只有C语言。因为专业比较小众，很多面试官都不太了解，都会对于我们能不能胜任软件开发的岗位表示怀疑。学院里面做应用软件开发的也是不多的，所以也就没">
+<meta name="keywords" content="随笔">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于Java入门的一些个人看法">
+<meta property="og:url" content="https://marsseu.github.io/2017/05/31/关于Java入门的一些个人看法/index.html">
+<meta property="og:site_name" content="Mars&#39;s Blog">
+<meta property="og:description" content="两周前终于答辩结束了，研究生顺利毕业。其实我很早就就迫不及待想毕业，早点工作，早点进入自己期待的行业奋好好奋斗一番。前几天有师弟师妹问我关于找工作的事情，还有如何学好Java找到理想的工作。因为我们的专业邻域属于仪器科学，很多都是做硬件，稍微沾点软件的只有C语言。因为专业比较小众，很多面试官都不太了解，都会对于我们能不能胜任软件开发的岗位表示怀疑。学院里面做应用软件开发的也是不多的，所以也就没">
+<meta property="og:updated_time" content="2017-05-31T07:51:54.733Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="关于Java入门的一些个人看法">
+<meta name="twitter:description" content="两周前终于答辩结束了，研究生顺利毕业。其实我很早就就迫不及待想毕业，早点工作，早点进入自己期待的行业奋好好奋斗一番。前几天有师弟师妹问我关于找工作的事情，还有如何学好Java找到理想的工作。因为我们的专业邻域属于仪器科学，很多都是做硬件，稍微沾点软件的只有C语言。因为专业比较小众，很多面试官都不太了解，都会对于我们能不能胜任软件开发的岗位表示怀疑。学院里面做应用软件开发的也是不多的，所以也就没">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://marsseu.github.io/2017/05/31/关于Java入门的一些个人看法/"/>
+
+
+
+
+
+  <title> 关于Java入门的一些个人看法 | Mars's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Mars's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">D.R.E.A.M</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://marsseu.github.io/2017/05/31/关于Java入门的一些个人看法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Mars WANG">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mars's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                关于Java入门的一些个人看法
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-31T13:24:27+08:00">
+                2017-05-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>  两周前终于答辩结束了，研究生顺利毕业。其实我很早就就迫不及待想毕业，早点工作，早点进入自己期待的行业奋好好奋斗一番。前几天有<br>师弟师妹问我关于找工作的事情，还有如何学好Java找到理想的工作。因为我们的专业邻域属于仪器科学，很多都是做硬件，稍微沾点软件的只有C语言。<br>因为专业比较小众，很多面试官都不太了解，都会对于我们能不能胜任软件开发的岗位表示怀疑。学院里面做应用软件开发的也是不多的，所以<br>也就没有其他学院那种全民学软件的氛围，哈~~~  虽然我也只是个菜鸟，但是对于如何转行做Java开发还是有一些自己的看法的，毕竟当初<br>我是摸着石头过河，一路走到现在，也走了很多弯路。    </p>
+<p>  最开始自己并没有想做Java程序员，因为有点C语言基础就想转型做C++程序员。研一的那年暑假，网上找到那本《C++ Primer》的电子版开始看，<br>  讲的都是C++基础而且很详细，我边看边做后面的练习，并且记笔记，同时将重点内容在pdf上进行标记。大概用了一个多月看完一遍了，<br>  收获还是蛮多的，不多很多看了都记不住，所以打算再看一遍。同时，我在网上找到了清华大学邓俊辉老师的数据结构课程，正好也是C++的，<br> 。于是就变撸第二遍边看数据结构的视频课程，当然自己也会跟着做练习。在第二遍看《C++primer》的时候会去关注底层的一些实现。就这样在第二部遍撸完<br> ，数据结构视频也看完之后感觉自己好像还是什么也做不了，就想找点项目做，可是网上找了好久似乎也没有适合自己参与的C++项目，当时苦恼得很。   </p>
+<p> 当时有个基友已经在一家公司实习，他是做Android开发的，他告诉我现在很少公司用C++开发应用了，如果以后想去互联网公司发展还是学学Java吧！当时还是满沮丧的，<br> 毕竟花了时间学C++了的，没办法，只能转向Java。吸取之前的经验，看书速度太慢了，于是就在网上找Java基础的视频开始看，我看的是马士兵的视频，课程虽然<br> 很旧了，但是讲的很清楚，很有条理。于是就边看视频边跟着做练习。视频比较多，当时真的是从早看到晚，然后第二天复习前一天的内容。<br> 到十二月份才看完基础部分，当时也清楚自己不懂得还有很多，数据库也不熟悉。就花了差不多两周的时间看了下数据库的东西，网上很多大牛的博客，学习了很多。<br> 后面就开始看web框架了，从servlet到spring，当时没有去关注内部实现，就学怎么使用，然后自己就跟着视频做简单的web系统，后面也就知道之前自己做得这些只是<br> 玩具而已，完全上不了台面的。不过对自己的学习还是有帮助的。一直在自学，到了研二上学期，听了基友的建议开始找实习。刚开学那一两个月，投了估计不少于50家<br> 公司的实习，有回应的差不多二十几家。但是面试的结果都是很悲惨的了，发现很多不会的，问到Java里面一些类的实现，不会，ioc和aop的原理，不会，设计模式，不会，<br> 写个算法，写错了。。。。经历了一次次打击。后来就索性把面试当成学习了，把面试中遇到的所有问题及其相关的问题都自己回来查资料搞明白。慢慢的很多问题都会了，<br> 后来就拿了几家公司的offer。最后选择上海的一家小的电商公司，之后又去了一家券商的信息技术部实现。在秋招的时候，虽然与BAT无缘，但是签了一家还算满意的<br> 互联网公司。在签了工作之后自己又去了一家数据公司实习了两个月。实习的过程就不详述了，总之实习是成长最快的。所以我想方设法找实习，哈哈~~~     </p>
+<p> 对于非计算机软件相关专业的同学学习Java，我的第一点看法就是：<strong>首先学会用</strong>。工具很多，框架很多，先学会如何使用它们，最开始不用关注太深层次的原理，否则进度太慢了，而且得不到成就感。<br> 第二点：<strong>不要只看书或者视频不练习</strong>。你可能会看很多书或者视频，但是书上的练习是要自己去完成的，看视频的时候看完异界就要自己实现以下视频里面的代码，这样才能学的更牢固并且能够及时暴露出你还没听懂的地方。<br> 第三点：<strong>学习速度和学习质量要得到平衡</strong>。最终而言当然是质量是最重要的，刨根究底，搞懂原理是需要的。但是在时间有限的情况下还是需要权衡一下的，因为不是科班出身，需要学习的<br> 东西还是特别多的，需要有计划的学习才是，否则就会觉得学的很乱，最后啥也没掌握。第四点：<strong>学以致用</strong>。在学完语言基础和框架基础之后就可以上手做自己的东西了，<br> 从模仿开始，可以模仿视频或书上的例子，增加或修改其中的一些功能，当自己能够完整的做完的时候相信你会收获很多，不仅是技术上的成长，更会增加自己的成就感。<br>第五点，<strong>实习经历特别特别重要</strong>。和科班出身的同学竞争，实习是最好的加分点，企业都会很看重实习经历。但是从我的经历来看找实习也是一个漫长且煎熬的过程，<br>心理素质一定要好，不要怕打击，越多的打越能帮助自己成长和进步。除了之前提到实习经历我还在两小公司实习过，但是在那边都是做一些杂事或者是一些枯燥的web页面的测试，<br>我的目标是开发呀，做那些工作对自己没什么帮助，所以后来都果断离开了。苦点累点都是小事，但是对自己成长一定要有帮助才是有意义的。<br>最后一点，<strong>记笔记</strong>。俗话说好记性不如烂笔头，需要学习东西太多，很多中啊哟东西学以后过一段时间就会忘了，所以对于重要知识点最好还是记下来，我有试过一些云笔记软件，<br>但是最终还是喜欢手写，有空的时候就可以翻出来看看。      </p>
+<p>因为自己也只能算入门不久，所以只能在入门方法上谈谈自己的看法，我的方法是不是适合你，还请你自己考量。至于具体知识点，网上有很多写的很好的博客，我也一直在学习，选择进入互联网行业就要不断地学习<br>了，新的技术很多，只有不断学习才能让自己变得强大起来。共勉。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/随笔/" rel="tag"># 随笔</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/25/Docker下MySQL主从复制节点部署/" rel="next" title="Docker下MySQL主从复制节点部署">
+                <i class="fa fa-chevron-left"></i> Docker下MySQL主从复制节点部署
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Mars WANG" />
+          <p class="site-author-name" itemprop="name">Mars WANG</p>
+           
+              <p class="site-description motion-element" itemprop="description">Learning</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">tags</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mars WANG</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,687 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="容器与云计算," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="之前已经搭建了Redis数据库的主从复制结构，继续学习MySQL数据库的主从复制结构的搭建，继续踩坑。     首先拉取MySQL docker镜像到本地，1docker pull mysql:5.7 先创建master节点，1docker run --name mysql57-master -e MYSQL_ROOT_PASSWORD=123456 -p 5000:3306 -d mysql:5">
+<meta name="keywords" content="容器与云计算">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker下MySQL主从复制节点部署">
+<meta property="og:url" content="https://marsseu.github.io/2017/04/25/Docker下MySQL主从复制节点部署/index.html">
+<meta property="og:site_name" content="Mars&#39;s Blog">
+<meta property="og:description" content="之前已经搭建了Redis数据库的主从复制结构，继续学习MySQL数据库的主从复制结构的搭建，继续踩坑。     首先拉取MySQL docker镜像到本地，1docker pull mysql:5.7 先创建master节点，1docker run --name mysql57-master -e MYSQL_ROOT_PASSWORD=123456 -p 5000:3306 -d mysql:5">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/25/Docker下MySQL主从复制节点部署/Docker下MySQL主从复制节点部署/default_volume.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/25/Docker下MySQL主从复制节点部署/Docker下MySQL主从复制节点部署/enter_master.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/25/Docker下MySQL主从复制节点部署/Docker下MySQL主从复制节点部署/Fail.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/25/Docker下MySQL主从复制节点部署/Docker下MySQL主从复制节点部署/innodbbuffer.PNG">
+<meta property="og:updated_time" content="2017-05-06T05:47:45.216Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker下MySQL主从复制节点部署">
+<meta name="twitter:description" content="之前已经搭建了Redis数据库的主从复制结构，继续学习MySQL数据库的主从复制结构的搭建，继续踩坑。     首先拉取MySQL docker镜像到本地，1docker pull mysql:5.7 先创建master节点，1docker run --name mysql57-master -e MYSQL_ROOT_PASSWORD=123456 -p 5000:3306 -d mysql:5">
+<meta name="twitter:image" content="https://marsseu.github.io/2017/04/25/Docker下MySQL主从复制节点部署/Docker下MySQL主从复制节点部署/default_volume.PNG">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://marsseu.github.io/2017/04/25/Docker下MySQL主从复制节点部署/"/>
+
+
+
+
+
+  <title> Docker下MySQL主从复制节点部署 | Mars's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Mars's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">D.R.E.A.M</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://marsseu.github.io/2017/04/25/Docker下MySQL主从复制节点部署/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Mars WANG">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mars's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Docker下MySQL主从复制节点部署
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-25T15:52:16+08:00">
+                2017-04-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前已经搭建了<a href="https://marsseu.github.io/2017/04/20/Docker%E4%B8%8BRedis%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E8%8A%82%E7%82%B9%E9%83%A8%E7%BD%B2/">Redis数据库的主从复制结构</a>，继续学习MySQL数据库的主从复制结构的搭建，继续踩坑。    </p>
+<p>首先拉取MySQL docker镜像到本地，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker pull mysql:5.7</div></pre></td></tr></table></figure></p>
+<p>先创建master节点，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run --name mysql57-master -e MYSQL_ROOT_PASSWORD=123456 -p 5000:3306 -d mysql:5.7</div></pre></td></tr></table></figure></p>
+<p>-p指定宿主端口映射到docker节点的端口，-e MYSQL_ROOT_PASSWORD 指定了数据库root的登录密码。这里我没用利用挂载volume的方式共享文件，但是在创建这个节点的时候默认会挂载一个volume，用命令查看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker inspect mysql57-master | grep Mounts -A 10</div></pre></td></tr></table></figure></p>
+<p>结果如下图，<br><img src="Docker下MySQL主从复制节点部署/default_volume.PNG" alt="default_volume"><br>属性Destination表示的目录中存的是数据库的数据文件。下面可以进入docker中，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker exec -it mysql57-master bash</div></pre></td></tr></table></figure></p>
+<p><img src="Docker下MySQL主从复制节点部署/enter_master.PNG" alt="enter_master"></p>
+<p>关于修改配置文件后面再介绍。<br>master节点已经启动了，下面创建slave节点,我原本想建立两个slave节点的，但是这里遇到一个坑，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">#slave1</div><div class="line">docker create --name mysql57-slave1 -v /home/mysql-conf/mysql57-slave1:/etc/mysql/mysql.conf.d -e MYSQL_ROOT_PASSWORD=123456 -p 5001:3306 mysql:5.7</div><div class="line">#slave2</div><div class="line">dcker create --name mysql57-slave2 -v /home/mysql-conf/mysql57-slave2:/etc/mysql/mysql.conf.d -e MYSQL_ROOT_PASSWORD=123456 -p 5002:3306 mysql:5.7</div></pre></td></tr></table></figure></p>
+<p>以上命令分别启动了两个slave节点， -v 将容器中的/etc/mysql/mysql.conf.d挂载到宿主服务器/home/mysql-conf/mysql57-slave1和/home/mysql-conf/mysql57-slave2目录下，用于配置文件的修改，在本地目录中修改的文件会同步到docker<br>容器中，并将两个节点的3306端口映射到本地的5001和5002端口。但是，容器启动后开始运行正常，过了几十秒之后自动停止运行了，变为EXIT状态了。<br>这让我百思不得其解，命令应该是没有错的。使用docker ps命令查看本地正在运行的容器始终没有新启动的两个MySQL节点，后来利用，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker logs mysql57-slave1</div></pre></td></tr></table></figure></p>
+<p>查看启动日志，如下图：</p>
+<p><img src="Docker下MySQL主从复制节点部署/Fail.PNG" alt="Fail"></p>
+<p>看到其中有 error: Cannot allocate memory for the buffer pool. 难道是内存太小？查看mysql默认的内存占用情况，由于对innnodb内部的情况不是很了解，只查看了以下结果，<br><img src="Docker下MySQL主从复制节点部署/innodbbuffer.PNG" alt="innodbbuffer.PNG"><br>innodb_buffer_pool_size默认是128M，innodb_buffer_pool_chunk_size默认128M，innodb_log_buffer_size默认为16M，innodb_sort_buffer_size默认1M.<br>本服务器的运行内存是1G啊啊啊······ 而且已经有几个容器在运行了，果断删除了几个容器，并决定只启动一个slave节点。最后成功启动了。<br>下面要修改主数据库和从数据库的配置文件，之前在启动主数据库的时候并没有挂载配置文件所在的文件夹，只能利用默认的挂载数据库数据文件的文件夹。将宿主服务器中的MySQL配置文件复制一份到<br>“/var/lib/docker/volumes/b6f64d993f3f940e36f1c5091013ac418e5f583586acfe0382983077444b1903/_data” 文件夹下，修改配置文件，在文件结尾加上，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">#bind 127.0.0.1</div><div class="line"></div><div class="line">log-bin=mysql-bin</div><div class="line">server-id=1</div></pre></td></tr></table></figure></p>
+<p>同时需要注释掉绑定本地IP那一行。<br>之后进入主数据库的docker中，在”/var/lib/mysql”文件夹中看到mysqld.cnf配置文件，将配置文件拷贝到 /etc/mysql/mysql.conf.d中。<br>对于从数据库因为启动docker是挂载了配置文件目录，只需要将本地MySQL配置文件复制到文件夹”/home/mysql-conf/mysql57-slave1”中，并在文件结尾加上，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">#bind 127.0.0.1</div><div class="line"></div><div class="line">log-bin=mysql-bin</div><div class="line">server-id=2</div></pre></td></tr></table></figure></p>
+<p>同样需要注释掉绑定本地IP的那一行。<br>之后分别重启master数据库和slave数据库。   </p>
+<p>进入master节点的docker中,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker exec -it mysql57-master bash</div></pre></td></tr></table></figure></p>
+<p>登录到MySQL中，先创建一个用于备份的用户，<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">GRANT</span> <span class="keyword">REPLICATION</span> <span class="keyword">SLAVE</span> <span class="keyword">ON</span> *.* <span class="keyword">to</span> <span class="string">'backup'</span>@<span class="string">'SLAVE_IP_ADDR'</span> <span class="keyword">identified</span> <span class="keyword">by</span> <span class="string">'123456'</span>;</div></pre></td></tr></table></figure></p>
+<p>backup:用户名；SLAVE_IP_ADDR：为你的slave节点的ip地址，123456：为用户密码。如果允许所以IP进行备份，那么SLAVE_IP_ADDR 处可填为’%’。下面需要看看主数据库的状态，运行以下sql语句，<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">show</span> <span class="keyword">master</span> <span class="keyword">status</span>;</div></pre></td></tr></table></figure></p>
+<p>就会看到master的状态，主要是两个字段：master_log_file和master_log_pos。  </p>
+<p>之后，登录到slave MySQL中，设置主服务器信息，<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">change</span> <span class="keyword">master</span> <span class="keyword">to</span> master_host=<span class="string">'HOST_IP_ADDR'</span>,master_user=<span class="string">'backup'</span>,master_password=<span class="string">'123456'</span>,master_log_file=<span class="string">'mysql-bin.000002'</span>,master_log_pos=<span class="number">440</span>;</div></pre></td></tr></table></figure></p>
+<p>其中，master_host为master的ip地址，master_user和master_password为刚刚在主数据库中创建的用户和密码，master_log_file和master_log_pos是刚刚在主数据库中查询的状态。<br>坑来了，在从数据库中运行上面的sql语出错，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ERROR 1794 (HY000): Slave is not configured or failed to initialize properly. You must at least set –server-id to enable either a master or a slave. Additional error messages can be found in the MySQL error log.</div></pre></td></tr></table></figure></p>
+<p>怎么会没有指定server-id呢？明明在配置文件中指定了啊！查看slave数据库中的server-id，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">show global variables like &apos;server_id&apos;;</div></pre></td></tr></table></figure></p>
+<p>结果为server_id=0。怎么不是2？配置文件没加载？于是在slave 数据库的docker中查看配置文件的加载路径，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/usr/sbin/mysqld --verbose --help | grep &apos;Default options&apos; -A 1</div></pre></td></tr></table></figure></p>
+<p>结果是”/etc/my.cnf /etc/mysql/my.cnf ~/.my.cnf”，原来是从这三个地方加载配置文件，我以为自动加载在mysql.conf.d中的配置文件，于是将配置文件复制到 etc/mysql/中，将主从数据库重启。<br>重新运行上面的sql语句，成功了！<br>接着启动slave，<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">start</span> <span class="keyword">slave</span></div></pre></td></tr></table></figure></p>
+<p>查看slave状态，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">show slave status\G;</div></pre></td></tr></table></figure></p>
+<p>如果出现“Slave_IO_State: Waiting for master to send event”说明连接成功了！可以进行同步测试了。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/容器与云计算/" rel="tag"># 容器与云计算</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/21/第一个Dcoker应用栈部署/" rel="next" title="第一个Dcoker应用栈部署">
+                <i class="fa fa-chevron-left"></i> 第一个Dcoker应用栈部署
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/31/关于Java入门的一些个人看法/" rel="prev" title="关于Java入门的一些个人看法">
+                关于Java入门的一些个人看法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Mars WANG" />
+          <p class="site-author-name" itemprop="name">Mars WANG</p>
+           
+              <p class="site-description motion-element" itemprop="description">Learning</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">tags</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mars WANG</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

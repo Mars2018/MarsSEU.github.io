@@ -1,0 +1,692 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="容器与云计算," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="第一次接触容器，记录学习一下的过程，过程中主要参考的是浙江大学SEL实验室的《Docker-容器与容器云》。 Dacker的设计理念是希望将各个服务进行隔离，最终将所有服务进行连接形成Docker集群以实现具体功能。Docker常用的主要命令包括：  docker pull：用于从远程Docker registry中拉取镜像 docker run：基于特定镜像创建容器 docker images:">
+<meta name="keywords" content="容器与云计算">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker下的Redis主从复制节点搭建">
+<meta property="og:url" content="https://marsseu.github.io/2017/04/20/Docker下Redis主从复制节点部署/index.html">
+<meta property="og:site_name" content="Mars&#39;s Blog">
+<meta property="og:description" content="第一次接触容器，记录学习一下的过程，过程中主要参考的是浙江大学SEL实验室的《Docker-容器与容器云》。 Dacker的设计理念是希望将各个服务进行隔离，最终将所有服务进行连接形成Docker集群以实现具体功能。Docker常用的主要命令包括：  docker pull：用于从远程Docker registry中拉取镜像 docker run：基于特定镜像创建容器 docker images:">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/20/Docker下Redis主从复制节点部署/Docker下的Redis主从复制节点搭建/docker_redis.png">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/20/Docker下Redis主从复制节点部署/Docker下的Redis主从复制节点搭建/dockers.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/20/Docker下Redis主从复制节点部署/Docker下的Redis主从复制节点搭建/docker_redis_volume.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/20/Docker下Redis主从复制节点部署/Docker下的Redis主从复制节点搭建/docker_redis_savetime.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/20/Docker下Redis主从复制节点部署/Docker下的Redis主从复制节点搭建/docker_redis_master.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/20/Docker下Redis主从复制节点部署/Docker下的Redis主从复制节点搭建/docker_redis_slave.PNG">
+<meta property="og:updated_time" content="2017-05-06T05:40:18.479Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker下的Redis主从复制节点搭建">
+<meta name="twitter:description" content="第一次接触容器，记录学习一下的过程，过程中主要参考的是浙江大学SEL实验室的《Docker-容器与容器云》。 Dacker的设计理念是希望将各个服务进行隔离，最终将所有服务进行连接形成Docker集群以实现具体功能。Docker常用的主要命令包括：  docker pull：用于从远程Docker registry中拉取镜像 docker run：基于特定镜像创建容器 docker images:">
+<meta name="twitter:image" content="https://marsseu.github.io/2017/04/20/Docker下Redis主从复制节点部署/Docker下的Redis主从复制节点搭建/docker_redis.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://marsseu.github.io/2017/04/20/Docker下Redis主从复制节点部署/"/>
+
+
+
+
+
+  <title> Docker下的Redis主从复制节点搭建 | Mars's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Mars's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">D.R.E.A.M</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://marsseu.github.io/2017/04/20/Docker下Redis主从复制节点部署/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Mars WANG">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mars's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Docker下的Redis主从复制节点搭建
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-20T08:53:30+08:00">
+                2017-04-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>第一次接触容器，记录学习一下的过程，过程中主要参考的是浙江大学SEL实验室的<strong>《Docker-容器与容器云》</strong>。 Dacker的设计理念是希望将各个服务进行隔离，最终将所有服务进行连接形成Docker集群以实现具体功能。Docker常用的主要命令包括：</p>
+<ul>
+<li>docker pull：用于从远程Docker registry中拉取镜像</li>
+<li>docker run：基于特定镜像创建容器</li>
+<li>docker images:查看本地有的镜像</li>
+<li>docker rm: 用于删除容器</li>
+<li>docker rmi:用于删除镜像</li>
+<li>docker attach：用于连接到正在运行的容器</li>
+<li>docker inspect：用于查看镜像或者容器的信息</li>
+<li>docker ps：查看容器相关运行信息 </li>
+</ul>
+<p>首先是服务器的选择，我使用的是百度云服务器BCC，注册了一下，9.9元试用一个月。第一步就是学习搭建一个主从复制节点的Redis Docker集群，Redis节点主要结构如下图：</p>
+<p><img src="Docker下的Redis主从复制节点搭建/docker_redis.png" alt="Image of redis nodes"></p>
+<p>其中redis-master作为主数据节点，redis-slave1和redis-slave2作为从节点，主节点中更新的数据会复制到每个从节点中。<br>建立过程:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"># 拉取镜像</div><div class="line">sudo docker pull redis</div></pre></td></tr></table></figure>
+<p><em>注意:这里需要先启动master节点，然后启动slave节点并将slave节点连接到master节点上</em></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"># 打开一个终端，启动Redis容器master节点</div><div class="line">sudo docker run -it --name redis-master -v /data redis /bin/bash</div><div class="line"># 打开两个终端，分别启动Redis容器slave节点并连接到master节点</div><div class="line">sudo docker run -it --name redis-slave1 --link redis-master:master -v /data redis /bin/bash</div><div class="line">sudo docker run -it --name redis-slave2 --link redis-master:master -v /data redis /bin/bash</div></pre></td></tr></table></figure>
+<p>解释一下上面的命令，-i表示使用交互模式；-t表示分配一个伪终端；–name 表示指定的容器名称；–link 表示连接到的节点 redis-master，并将master-redis绑定为名称master；-v 是挂载volume的，至于volume是什么这里不做详细解释，就理解为用于保存数据以及容器间数据共享的文件系统；<br>此时可以通过<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker ps</div></pre></td></tr></table></figure></p>
+<p>查看启动的容器信息：</p>
+<p><img src="Docker下的Redis主从复制节点搭建/dockers.PNG" alt="Dockers of redis"></p>
+<p>其中第一列为容器编号，第二列为构造容器的镜像，最后一列为自己指定的容器名称。</p>
+<p>容器建好之后下面要对其进行配置。每个redis容器应该要有自己的配置文件的，由于Docker redis是简洁的镜像，没有相关的编辑文件等工具，这时就需要利用上文提到的volume了。每一个docker都挂载了volume，只需要知道宿主服务器中每个docker挂载在本地的volume的物理目录就可以将相关的配置文件<br>复制到该目录下，此时相应的docker中的/data文件夹下就会看到这个配置文件了，所有的配置文件修改都是在宿主服务器中进行的。下面就要在宿主服务器中找到volume挂载的目录。<br>使用命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo docker inspect redis-master | grep Mounts -A 10</div></pre></td></tr></table></figure></p>
+<p>看到如下结果：<br><img src="Docker下的Redis主从复制节点搭建/docker_redis_volume.PNG" alt="Image of docker volume"></p>
+<p>“Source”的值就是docker redis-master的volume在本地的物理地址。可以先在本地宿主服务器中安装redis，注意最后安装的版本要和docker中的redis版本一样，这样就可以直接复制本地的redis配置文件redis.conf到volume所挂载的目录了，然后再进行相应的修改。<br>假设已经成功将本地的redis.conf分别复制到了三个docker的volume中了，下面需要对每个配置文件进行修改。对于主数据库redis-master而言，要把配置文件中的参数值修改如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">deamonize yes</div><div class="line">pidfile /var/run/redis.pid</div></pre></td></tr></table></figure></p>
+<p>并将“bind 127.0.0.1”这一行注释掉，注意下面几行参数：<br><img src="Docker下的Redis主从复制节点搭建/docker_redis_savetime.PNG" alt="Docker redis conf"><br>表示的是当数据库分别更新了1条记录，10条记录，10000条记录的情况下，隔多久保存一次。默认的是“save 900 1”，即如果只更新一条记录就900秒再保存，时间太久了，于是我把它缩短到50秒。<br>对于slave节点的redis而言，需要修改如下参数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">deamonize yes</div><div class="line">pidfile /var/run/redis.pid</div><div class="line">slaveof master 6379</div></pre></td></tr></table></figure></p>
+<p>最后一句用于将从节点绑定到主节点，master就是之前在建立容器时指定的主节点的别名。<br>好了，安装和配置工作都完成了，下面要重新启动各个节点的redis数据库。使用在各个数据库docker中运行命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"># 进入到redis配置文件所在的目录，即容器中的volume目录</div><div class="line">cd /data</div><div class="line">#启动redis</div><div class="line">redis-server redis.conf</div><div class="line"># 进入数据库</div><div class="line">redis-cli</div></pre></td></tr></table></figure></p>
+<p>主从节点的redis都启动之后，在主节点中插入一条数据：</p>
+<p><img src="Docker下的Redis主从复制节点搭建/docker_redis_master.PNG" alt="docker_redis_master.PNG"></p>
+<p>在从节点中可以查到更新的数据：</p>
+<p><img src="Docker下的Redis主从复制节点搭建/docker_redis_slave.PNG" alt="docker_redis_slave1"></p>
+<p>至此，基于Docker的Redis主从复制节点搭建完成。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/容器与云计算/" rel="tag"># 容器与云计算</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/21/第一个Dcoker应用栈部署/" rel="prev" title="第一个Dcoker应用栈部署">
+                第一个Dcoker应用栈部署 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Mars WANG" />
+          <p class="site-author-name" itemprop="name">Mars WANG</p>
+           
+              <p class="site-description motion-element" itemprop="description">Learning</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">tags</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mars WANG</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

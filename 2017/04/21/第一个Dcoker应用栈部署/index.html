@@ -1,0 +1,681 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="容器与云计算," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="继续学习浙江大学SEL实验编写的《Docker-容器与容器云》，之前已经基于Docker搭建了Redis主从数据库，下面要利用这个数据库搭建一个完整基于Django的Docker应用栈，其中包括了一个代理节点，两个Web应用节点和Redis数据库节点，整体结构如下图所示：其中，HAProxy为负载均衡代理节节点，两个Web应用都是基于Django设计的，Redis数据库就是之前搭建的数据库节点。先">
+<meta name="keywords" content="容器与云计算">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第一个Dcoker应用栈部署">
+<meta property="og:url" content="https://marsseu.github.io/2017/04/21/第一个Dcoker应用栈部署/index.html">
+<meta property="og:site_name" content="Mars&#39;s Blog">
+<meta property="og:description" content="继续学习浙江大学SEL实验编写的《Docker-容器与容器云》，之前已经基于Docker搭建了Redis主从数据库，下面要利用这个数据库搭建一个完整基于Django的Docker应用栈，其中包括了一个代理节点，两个Web应用节点和Redis数据库节点，整体结构如下图所示：其中，HAProxy为负载均衡代理节节点，两个Web应用都是基于Django设计的，Redis数据库就是之前搭建的数据库节点。先">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/21/第一个Dcoker应用栈部署/第一个Dcoker应用栈部署/DockerAppStack.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/21/第一个Dcoker应用栈部署/第一个Dcoker应用栈部署/dockers.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/21/第一个Dcoker应用栈部署/第一个Dcoker应用栈部署/haproxy.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/21/第一个Dcoker应用栈部署/第一个Dcoker应用栈部署/app1.PNG">
+<meta property="og:image" content="https://marsseu.github.io/2017/04/21/第一个Dcoker应用栈部署/第一个Dcoker应用栈部署/app2.PNG">
+<meta property="og:updated_time" content="2017-05-06T05:40:14.099Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="第一个Dcoker应用栈部署">
+<meta name="twitter:description" content="继续学习浙江大学SEL实验编写的《Docker-容器与容器云》，之前已经基于Docker搭建了Redis主从数据库，下面要利用这个数据库搭建一个完整基于Django的Docker应用栈，其中包括了一个代理节点，两个Web应用节点和Redis数据库节点，整体结构如下图所示：其中，HAProxy为负载均衡代理节节点，两个Web应用都是基于Django设计的，Redis数据库就是之前搭建的数据库节点。先">
+<meta name="twitter:image" content="https://marsseu.github.io/2017/04/21/第一个Dcoker应用栈部署/第一个Dcoker应用栈部署/DockerAppStack.PNG">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://marsseu.github.io/2017/04/21/第一个Dcoker应用栈部署/"/>
+
+
+
+
+
+  <title> 第一个Dcoker应用栈部署 | Mars's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Mars's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">D.R.E.A.M</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://marsseu.github.io/2017/04/21/第一个Dcoker应用栈部署/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Mars WANG">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mars's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                第一个Dcoker应用栈部署
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-21T13:03:39+08:00">
+                2017-04-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>继续学习浙江大学SEL实验编写的《Docker-容器与容器云》，之前已经基于Docker搭建了Redis主从数据库，<br>下面要利用这个数据库搭建一个完整基于Django的Docker应用栈，其中包括了一个代理节点，两个Web应用节点<br>和Redis数据库节点，整体结构如下图所示：<br><img src="第一个Dcoker应用栈部署/DockerAppStack.PNG" alt="Docker App Stack"><br>其中，HAProxy为负载均衡代理节节点，两个Web应用都是基于Django设计的，Redis数据库就是之前搭建的数据库节点。<br>先拉取Docker镜像，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">docker pull django</div><div class="line">docker pull haproxy</div></pre></td></tr></table></figure></p>
+<p>启动Django容器，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo docker run -it --name APP1 --link redis-master:db -v ~/Projects/Django/APP1:/usr/src/app django /bin/bash</div><div class="line">sudo docker run -it --name APP1 --link redis-master:db -v ~/Projects/Django/APP1:/usr/src/app django /bin/bash</div></pre></td></tr></table></figure></p>
+<p>启动HAProxy容器，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo docker -it --name HAProxy --link APP1:APP1 --link APP2:APP2 -p 6301:6301 -v ~/Projects/HAProxy:/tmp haproxy</div></pre></td></tr></table></figure></p>
+<p>参数-p表示绑定的端口，其他的参数就不再一一解释了，可以查看建立Redis数据库的过程中的解释。<br>随后运行命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker ps</div></pre></td></tr></table></figure></p>
+<p>查看到宿主服务器中已经运行了6个容器，如下图：<br><img src="第一个Dcoker应用栈部署/dockers.PNG" alt="Docker App Stack"><br>下面开始在Django容器中分别部署应用，以APP1为例，APP2的过程也是一样的。首先需要在Django容器中安装Python语言的Redis支持包，在容器APP1中执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pip install redis</div></pre></td></tr></table></figure></p>
+<p>安装完成时候可以测试一下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">#进入Python</div><div class="line">python</div><div class="line">#运行</div><div class="line">&gt;&gt;&gt; import redis</div><div class="line">&gt;&gt;&gt; print(redis.__file__)</div></pre></td></tr></table></figure></p>
+<p>如果安装正确就会显示出<strong>init</strong>.py所在的目录。<br>因为之前创建Django容器的时候挂载了-v ~/Projects/Django/APP1:/usr/src/app 的volume，可以进入容器中的volume目录/usr/src/app，并创建APP，过程如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">#Django Docke中</div><div class="line">cd /usr/src/app</div><div class="line">#创建目录</div><div class="line">mkdir dockerweb</div><div class="line">cd dockerweb/</div><div class="line">#新建项目</div><div class="line">django-admin.py startproject redisweb</div><div class="line">cd redisweb/</div><div class="line">#新建应用</div><div class="line">python manage.py startapp helloworld</div></pre></td></tr></table></figure></p>
+<p>此时一个Django的web应用就新建完成了，并且可以在宿主服务器的 ~/Projects/Django/APP1目录中看到文件夹dockerweb。  </p>
+<p>下面需要对新建的app进行配置修改，主要是在宿主服务器中完成的，因为volume中的文件是宿主服务器和对应的Docker容器共享的。首先修改dockerweb/redisweb/helloworld下的<br>views.py 文件，用于储存和读取Redis数据库中的数据，views.py文件修改如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.shortcuts <span class="keyword">import</span> render</div><div class="line"><span class="keyword">from</span> django.http <span class="keyword">import</span> HttpResponse</div><div class="line"></div><div class="line"><span class="comment">#创建你自己的view</span></div><div class="line"><span class="keyword">import</span> redis</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(request)</span>:</span></div><div class="line">	str=redis.__file__</div><div class="line">	str+=<span class="string">"&lt;br&gt;"</span></div><div class="line">	r=redis.Redis(host=<span class="string">'db'</span>,port=<span class="number">6373</span>,db=<span class="number">0</span>)</div><div class="line">	info=r.info()</div><div class="line">	str+=(<span class="string">"Set Hi &lt;br&gt;"</span>)</div><div class="line">	r.set(<span class="string">'Hi'</span>,<span class="string">'HelloWorld-APP1'</span>)</div><div class="line">	str+=(<span class="string">"Get Hi: %s &lt;br&gt;"</span> % r.get(<span class="string">'Hi'</span>))</div><div class="line">	str+=(<span class="string">"Redis Info:&lt;br&gt;"</span>)</div><div class="line">	str+=(<span class="string">"Key: Info Value"</span>)</div><div class="line">	<span class="keyword">for</span> key <span class="keyword">in</span> info.keys()</div><div class="line">		str+=(<span class="string">"%s: %s&lt;br&gt;"</span> % (key,info[key]))</div><div class="line">	<span class="keyword">return</span> HttpResponse(str)</div></pre></td></tr></table></figure></p>
+<p>之前在创建容器的时候我们使用了–link参数创建db连接替代具体的IP地址。接下来要修改redisweb项目的配置文件setting.py，添加helloworld应用，<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">INSTALLED_APPS = (</div><div class="line">	<span class="string">'django.contrib.admin'</span>,</div><div class="line">	<span class="string">'django.contrib.auth'</span>,</div><div class="line">	<span class="string">'django.contrib.contenttypes'</span>,</div><div class="line">	<span class="string">'django.contrib.sessions'</span>,</div><div class="line">	<span class="string">'django.contrib.messages'</span>,</div><div class="line">	<span class="string">'django.contrib.staticfiles'</span>,</div><div class="line">	<span class="string">'helloworld'</span>,</div><div class="line">)</div></pre></td></tr></table></figure></p>
+<p><strong>注意：为了让外部地址访问，在setting.py文件中要设置ALLOWED_HOSTS = [‘*’]</strong>  </p>
+<p>最后修改redisweb项目的URL模式文件urls.py,<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.conf.urls <span class="keyword">import</span> patterns, include, urls</div><div class="line"><span class="keyword">from</span> django.contrib <span class="keyword">import</span> admin</div><div class="line"><span class="keyword">from</span> helloworld.views <span class="keyword">import</span> hello</div><div class="line">urlpatterns = pattern(</div><div class="line">	<span class="string">''</span>,</div><div class="line">	url(<span class="string">r'^admin/'</span>,include(admin.site.urls)),</div><div class="line">	url(<span class="string">r'^helloworld$'</span>,hello),</div><div class="line">)</div></pre></td></tr></table></figure></p>
+<p>在宿主服务器中修改完这几个文件后，再次进入容器中，在目录/usr/src/app/dockerweb/redisweb下完成项目的生成，依次执行如下命令，<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">python manage.py makemigrations</div><div class="line">python manage.py migrate</div></pre></td></tr></table></figure></p>
+<p>此时项目就生成了。两个容器APP1和APP2中都是相同的步骤。在启动项目的时候可以指定端口和IP地址，为了通过HAProxy容器节点接受外网公共IP访问，实现均衡负载，需要指定服务器的IP地址和端口。<br>这里对于APP1我们使用8001端口，对于APP2使用8002端口，同时地都是用0.0.0.0，表示任意地址。启动服务器的命令如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">#在Django的容器中运行</div><div class="line">python manage.py runserver 0.0.0.0:8001</div></pre></td></tr></table></figure></p>
+<p>下面进行最后一步进行HAProxy的配置。首先在本地宿主服务器中安装haproxy，然后将其配置文件拷贝一份到HAProxy挂载volume的目录~/Projects/HAProxy中,然后修改配置成下图，<br><img src="第一个Dcoker应用栈部署/haproxy.PNG" alt="Docker App Stack"><br>关于haproxy的配置中各个参数的意义可以查看相关文档。配置完成之后，文件已经同步到了HAProxy容器中挂载的volume目录/tmp中，再将其复制到haproxy的主目录/usr/local/sbin中，<br>最后在/usr/local/sbin中运行启动命令，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">haproxy -f haproxy.cfg</div></pre></td></tr></table></figure></p>
+<p>至此，应用栈的各部分配置已经完成，并都已经启动了，下面进行测试，在本地浏览器中输入宿主服务器的地进行访问，如下图，<br><img src="第一个Dcoker应用栈部署/app1.PNG" alt="Docker App Stack"><br><img src="第一个Dcoker应用栈部署/app2.PNG" alt="Docker App Stack"></p>
+<p>完成。:octocat:</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/容器与云计算/" rel="tag"># 容器与云计算</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/20/Docker下Redis主从复制节点部署/" rel="next" title="Docker下的Redis主从复制节点搭建">
+                <i class="fa fa-chevron-left"></i> Docker下的Redis主从复制节点搭建
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/25/Docker下MySQL主从复制节点部署/" rel="prev" title="Docker下MySQL主从复制节点部署">
+                Docker下MySQL主从复制节点部署 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Mars WANG" />
+          <p class="site-author-name" itemprop="name">Mars WANG</p>
+           
+              <p class="site-description motion-element" itemprop="description">Learning</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">tags</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Mars WANG</span>
+</div>
+
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
